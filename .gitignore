@@ -1,0 +1,8 @@
+Main_dataset/
+
+__pycache__/
+*.pyc
+
+*.zip
+
+outputs/phase2_smoke/

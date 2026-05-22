@@ -174,13 +174,19 @@ def _evaluate_arrays(
     }
 
 
-def _build_series_split_arrays(source_series: pd.Series, config: Phase1Config) -> dict[str, dict[str, object]]:
+def _build_series_split_arrays(
+    source_series: pd.Series,
+    config: Phase1Config,
+    train_mean: float | None = None,
+    train_std: float | None = None,
+) -> dict[str, dict[str, object]]:
     split_lookup = {window.key: window for window in config.baseline_splits}
-    train_series = _build_window_series(source_series, split_lookup["train_2011_to_2012q3"])
-    train_mean = float(train_series.mean())
-    train_std = float(train_series.std())
-    if train_std <= 1e-6:
-        train_std = 1.0
+    if train_mean is None or train_std is None:
+        train_series = _build_window_series(source_series, split_lookup["train_2011_to_2012q3"])
+        train_mean = float(train_series.mean())
+        train_std = float(train_series.std())
+        if train_std <= 1e-6:
+            train_std = 1.0
 
     arrays: dict[str, dict[str, object]] = {}
     for split in config.baseline_splits:
@@ -195,6 +201,51 @@ def _build_series_split_arrays(source_series: pd.Series, config: Phase1Config) -
             "std": train_std,
         }
     return arrays
+
+
+def _build_stacked_household_train_arrays(
+    household_series: list[pd.Series],
+    config: Phase1Config,
+) -> tuple[dict[str, np.ndarray], float, float]:
+    if not household_series:
+        raise ValueError("At least one household series is required to build stacked node training arrays.")
+
+    train_window = {window.key: window for window in config.baseline_splits}["train_2011_to_2012q3"]
+    stacked_train_values = np.concatenate(
+        [
+            _build_window_series(series, train_window).to_numpy(dtype=np.float32)
+            for series in household_series
+        ]
+    )
+    train_mean = float(stacked_train_values.mean())
+    train_std = float(stacked_train_values.std())
+    if train_std <= 1e-6:
+        train_std = 1.0
+
+    train_feature_parts: list[np.ndarray] = []
+    train_target_parts: list[np.ndarray] = []
+    for series in household_series:
+        household_arrays = _build_series_split_arrays(
+            source_series=series,
+            config=config,
+            train_mean=train_mean,
+            train_std=train_std,
+        )
+        train_features = household_arrays["train_2011_to_2012q3"]["features"]
+        train_targets = household_arrays["train_2011_to_2012q3"]["targets"]
+        if len(train_features) == 0:
+            continue
+        train_feature_parts.append(train_features)
+        train_target_parts.append(train_targets)
+
+    if not train_feature_parts:
+        raise ValueError("Stacked household training produced no samples for the node.")
+
+    stacked_arrays = {
+        "features": np.concatenate(train_feature_parts, axis=0),
+        "targets": np.concatenate(train_target_parts, axis=0),
+    }
+    return stacked_arrays, train_mean, train_std
 
 
 def assign_nodes(selected_households: pd.DataFrame, config: Phase1Config) -> pd.DataFrame:
@@ -358,7 +409,11 @@ def run_node_lstm_analysis(
     config: Phase1Config,
 ) -> NodeBaselineArtifacts:
     node_frame = hourly_frame.merge(node_assignments[["LCLid", "node_id", "node_type"]], on="LCLid", how="inner")
-    node_series_lookup = {
+    household_series_lookup = {
+        household_id: household_frame.set_index("timestamp")["energy_kwh"].sort_index()
+        for household_id, household_frame in hourly_frame.groupby("LCLid", sort=False)
+    }
+    node_mean_series_lookup = {
         node_id: frame.groupby("timestamp")["energy_kwh"].mean().sort_index()
         for node_id, frame in node_frame.groupby("node_id", sort=False)
     }
@@ -372,10 +427,24 @@ def run_node_lstm_analysis(
 
     split_metadata = {window.key: window.label for window in config.baseline_splits}
     for seed_offset, metadata in enumerate(node_metadata.itertuples(index=False)):
-        split_arrays = _build_series_split_arrays(node_series_lookup[metadata.node_id], config)
+        household_ids = (
+            node_assignments[node_assignments["node_id"] == metadata.node_id]["LCLid"]
+            .drop_duplicates()
+            .tolist()
+        )
+        stacked_train_arrays, train_mean, train_std = _build_stacked_household_train_arrays(
+            [household_series_lookup[household_id] for household_id in household_ids],
+            config,
+        )
+        evaluation_arrays = _build_series_split_arrays(
+            source_series=node_mean_series_lookup[metadata.node_id],
+            config=config,
+            train_mean=train_mean,
+            train_std=train_std,
+        )
         model, device, training_history = _fit_model_from_arrays(
-            split_arrays["train_2011_to_2012q3"]["features"],
-            split_arrays["train_2011_to_2012q3"]["targets"],
+            stacked_train_arrays["features"],
+            stacked_train_arrays["targets"],
             config,
             seed_offset=seed_offset + 1,
         )
@@ -384,6 +453,7 @@ def run_node_lstm_analysis(
                 node_id=metadata.node_id,
                 node_type=metadata.node_type,
                 household_count=metadata.household_count,
+                train_sequence_count=len(stacked_train_arrays["targets"]),
             )
         )
 
@@ -391,10 +461,10 @@ def run_node_lstm_analysis(
             metrics = _evaluate_arrays(
                 model=model,
                 device=device,
-                features=split_arrays[split.key]["features"],
-                targets=split_arrays[split.key]["targets"],
-                mean=split_arrays[split.key]["mean"],
-                std=split_arrays[split.key]["std"],
+                features=evaluation_arrays[split.key]["features"],
+                targets=evaluation_arrays[split.key]["targets"],
+                mean=evaluation_arrays[split.key]["mean"],
+                std=evaluation_arrays[split.key]["std"],
                 batch_size=config.batch_size,
             )
             metric_rows.append(

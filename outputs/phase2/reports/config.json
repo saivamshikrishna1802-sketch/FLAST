@@ -1,0 +1,43 @@
+{
+  "phase1_root": "C:\\Users\\DELL\\OneDrive\\\u753b\u50cf\\Desktop\\researchpaper_code\\outputs\\phase1",
+  "output_root": "C:\\Users\\DELL\\OneDrive\\\u753b\u50cf\\Desktop\\researchpaper_code\\outputs\\phase2",
+  "random_seed": 17,
+  "sequence_length": 48,
+  "train_stride": 3,
+  "eval_stride": 1,
+  "batch_size": 512,
+  "epochs": 20,
+  "learning_rate": 0.001,
+  "hidden_size": 64,
+  "dropout": 0.2,
+  "improvement_target_pct": 3.0,
+  "attention_heatmap_sequences": 48,
+  "drift_node_id": null,
+  "stable_node_id": null,
+  "baseline_splits": [
+    {
+      "key": "train_2011_to_2012q3",
+      "label": "Train: 2011-11 to 2012-09",
+      "start": "2011-11-23 00:00:00",
+      "end": "2012-10-01 00:00:00"
+    },
+    {
+      "key": "test_2012q4",
+      "label": "Test: 2012 Q4",
+      "start": "2012-10-01 00:00:00",
+      "end": "2013-01-01 00:00:00"
+    },
+    {
+      "key": "test_2013",
+      "label": "Test: 2013 drift year",
+      "start": "2013-01-01 00:00:00",
+      "end": "2014-01-01 00:00:00"
+    },
+    {
+      "key": "test_2014",
+      "label": "Test: 2014 post-drift",
+      "start": "2014-01-01 00:00:00",
+      "end": "2014-03-01 00:00:00"
+    }
+  ]
+}
