@@ -1,0 +1,9 @@
+LCLid,stdorToU,window_key,window_label,observed_hours_before_fill,expected_hours,raw_missing_rate,filled_missing_rate
+MAC000926,Std,drift_2013,2013 tariff-shift period,8664,8760,0.010958904109589041,0.0
+MAC002546,Std,drift_2013,2013 tariff-shift period,8736,8760,0.0027397260273972603,0.0
+MAC003623,Std,drift_2013,2013 tariff-shift period,8712,8760,0.005479452054794521,0.0
+MAC005446,Std,drift_2013,2013 tariff-shift period,8688,8760,0.00821917808219178,0.0
+MAC001410,ToU,drift_2013,2013 tariff-shift period,8736,8760,0.0027397260273972603,0.0
+MAC001487,ToU,drift_2013,2013 tariff-shift period,8712,8760,0.005479452054794521,0.0
+MAC002508,ToU,drift_2013,2013 tariff-shift period,8760,8760,0.0,0.0
+MAC005537,ToU,drift_2013,2013 tariff-shift period,8712,8760,0.005479452054794521,0.0

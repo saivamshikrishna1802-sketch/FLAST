@@ -1,0 +1,9 @@
+LCLid,node_id,node_type,node_index,node_household_count,stdorToU,Acorn_grouped,file,shift_score
+MAC000989,node_std_0,Std,0,2,Std,Adversity,block_94,0.4599291343055302
+MAC004067,node_std_0,Std,0,2,Std,ACORN-U,block_110,0.0
+MAC004405,node_std_1,Std,1,2,Std,Adversity,block_103,0.34329651208880396
+MAC004887,node_std_1,Std,1,2,Std,Affluent,block_8,0.6417846191465129
+MAC001030,node_tou_0,ToU,0,2,ToU,Affluent,block_17,657.6827044239931
+MAC003298,node_tou_0,ToU,0,2,ToU,Comfortable,block_64,1163.1842843163702
+MAC002930,node_tou_1,ToU,1,2,ToU,Affluent,block_38,526.5015430526382
+MAC004144,node_tou_1,ToU,1,2,ToU,Affluent,block_35,562.632649320925

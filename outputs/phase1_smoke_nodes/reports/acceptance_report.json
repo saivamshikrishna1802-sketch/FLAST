@@ -1,0 +1,53 @@
+{
+  "dataset_note": "2014 coverage is limited to Jan-Feb in the source dataset and is treated as a short post-drift window.",
+  "method_note": "ADF is retained only as a diagnostic artifact. It is not used as an acceptance criterion because unit-root testing is not a good match for mean-reverting household load.",
+  "acceptance_checks": [
+    {
+      "criterion": "Tariff-group distribution shift",
+      "target": "ToU distribution shift is statistically visible: KS statistic > 0.05 and p < 0.05.",
+      "observed": {
+        "tou_ks_statistic": 0.13565484243756687,
+        "tou_ks_p_value": 2.908886241126027e-296,
+        "tou_mean_shift_pct": 208.97606744824463,
+        "tou_std_shift_pct": 608.367806515604
+      },
+      "passed": true
+    },
+    {
+      "criterion": "Flat-rate stability",
+      "target": "Std group remains more stable than ToU in 2013.",
+      "observed": {
+        "std_mean_shift_pct": 3.1806026079319136,
+        "tou_mean_shift_pct": 208.97606744824463,
+        "std_ks_statistic": 0.09823165060037203,
+        "tou_ks_statistic": 0.13565484243756687
+      },
+      "passed": true
+    },
+    {
+      "criterion": "Node-level baseline degradation",
+      "target": "At least 3 of 4 nodes exceed 15% RMSE degradation in 2013.",
+      "observed": {
+        "degraded_nodes": 3,
+        "total_nodes": 4,
+        "tou_degraded_nodes": 2,
+        "std_degraded_nodes": 1,
+        "tou_avg_rmse_increase_pct": 350.5804272638008,
+        "std_avg_rmse_increase_pct": 27.257035310996756
+      },
+      "passed": true
+    },
+    {
+      "criterion": "No leakage",
+      "target": "Temporal splits are strictly ordered and normalization is fit on each train split only.",
+      "observed": {
+        "train_window_end": "2012-10-01 00:00:00",
+        "test_2012_start": "2012-10-01 00:00:00",
+        "test_2013_start": "2013-01-01 00:00:00",
+        "average_window_missing_rate_before_fill_pct": 15.933559366622681
+      },
+      "passed": true
+    }
+  ],
+  "all_checks_passed": true
+}

@@ -1,0 +1,5 @@
+epoch,train_loss,node_id,node_type,household_count
+1,0.49989803173603153,node_std_0,Std,2
+1,0.2580847713427666,node_std_1,Std,2
+1,0.32594480422826916,node_tou_0,ToU,2
+1,0.31829528778027266,node_tou_1,ToU,2

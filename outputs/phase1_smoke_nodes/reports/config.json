@@ -1,0 +1,73 @@
+{
+  "data_root": "C:\\Users\\DELL\\OneDrive\\\u753b\u50cf\\Desktop\\researchpaper_code\\Main_dataset",
+  "output_root": "outputs\\phase1_smoke_nodes",
+  "random_seed": 17,
+  "std_households": 4,
+  "tou_households": 4,
+  "sampling_strategy": "drift_targeted",
+  "households_per_node": 2,
+  "degradation_threshold_pct": 15.0,
+  "min_pre_days": 60,
+  "min_drift_days": 300,
+  "min_post_days": 45,
+  "adf_alpha": 0.05,
+  "acf_lags": 72,
+  "max_kde_points": 50000,
+  "sequence_length": 24,
+  "train_stride": 24,
+  "eval_stride": 24,
+  "batch_size": 128,
+  "baseline_epochs": 1,
+  "learning_rate": 0.001,
+  "hidden_size": 32,
+  "analysis_windows": [
+    {
+      "key": "pre_2011_2012",
+      "label": "2011-2012 pre-drift",
+      "start": "2011-11-23 00:00:00",
+      "end": "2013-01-01 00:00:00"
+    },
+    {
+      "key": "drift_2013",
+      "label": "2013 tariff-shift period",
+      "start": "2013-01-01 00:00:00",
+      "end": "2014-01-01 00:00:00"
+    },
+    {
+      "key": "post_2014",
+      "label": "2014 post-drift (Jan-Feb only)",
+      "start": "2014-01-01 00:00:00",
+      "end": "2014-03-01 00:00:00"
+    }
+  ],
+  "baseline_splits": [
+    {
+      "key": "train_2011_to_2012q3",
+      "label": "Train: 2011-11 to 2012-09",
+      "start": "2011-11-23 00:00:00",
+      "end": "2012-10-01 00:00:00"
+    },
+    {
+      "key": "test_2012q4",
+      "label": "Test: 2012 Q4",
+      "start": "2012-10-01 00:00:00",
+      "end": "2013-01-01 00:00:00"
+    },
+    {
+      "key": "test_2013",
+      "label": "Test: 2013 drift year",
+      "start": "2013-01-01 00:00:00",
+      "end": "2014-01-01 00:00:00"
+    },
+    {
+      "key": "test_2014",
+      "label": "Test: 2014 post-drift",
+      "start": "2014-01-01 00:00:00",
+      "end": "2014-03-01 00:00:00"
+    }
+  ],
+  "total_households": 8,
+  "std_node_count": 2,
+  "tou_node_count": 2,
+  "total_node_count": 4
+}

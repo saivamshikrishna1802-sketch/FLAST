@@ -1,0 +1,9 @@
+LCLid,stdorToU,Acorn,Acorn_grouped,file,pre_2011_2012_days,drift_2013_days,post_2014_days
+MAC000926,Std,ACORN-Q,Adversity,block_95,245,365,59
+MAC002546,Std,ACORN-E,Affluent,block_12,176,365,59
+MAC003623,Std,ACORN-L,Adversity,block_84,82,365,59
+MAC005446,Std,ACORN-E,Affluent,block_18,260,365,59
+MAC001410,ToU,ACORN-B,Affluent,block_3,228,365,59
+MAC001487,ToU,ACORN-E,Affluent,block_40,224,365,59
+MAC002508,ToU,ACORN-E,Affluent,block_31,178,365,59
+MAC005537,ToU,ACORN-F,Comfortable,block_45,259,365,59

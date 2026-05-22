@@ -1,0 +1,9 @@
+LCLid,stdorToU,window_key,window_label,observed_hours_before_fill,expected_hours,raw_missing_rate,filled_missing_rate
+MAC000926,Std,post_2014,2014 post-drift (Jan-Feb only),1344,1416,0.05084745762711865,0.0
+MAC002546,Std,post_2014,2014 post-drift (Jan-Feb only),1392,1416,0.01694915254237288,0.0
+MAC003623,Std,post_2014,2014 post-drift (Jan-Feb only),1392,1416,0.01694915254237288,0.0
+MAC005446,Std,post_2014,2014 post-drift (Jan-Feb only),1392,1416,0.01694915254237288,0.0
+MAC001410,ToU,post_2014,2014 post-drift (Jan-Feb only),1392,1416,0.01694915254237288,0.0
+MAC001487,ToU,post_2014,2014 post-drift (Jan-Feb only),1392,1416,0.01694915254237288,0.0
+MAC002508,ToU,post_2014,2014 post-drift (Jan-Feb only),1392,1416,0.01694915254237288,0.0
+MAC005537,ToU,post_2014,2014 post-drift (Jan-Feb only),1392,1416,0.01694915254237288,0.0

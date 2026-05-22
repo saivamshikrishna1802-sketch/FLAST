@@ -1,0 +1,59 @@
+{
+  "dataset_note": "2014 coverage is limited to Jan-Feb in the source dataset and is treated as a short post-drift window.",
+  "acceptance_checks": [
+    {
+      "criterion": "ADF drift evidence",
+      "target": "2013 ADF failure rate is at least 30 percentage points higher than 2011-2012.",
+      "observed": {
+        "pre_2011_2012_failure_rate_pct": 0.0,
+        "drift_2013_failure_rate_pct": 0.0,
+        "difference_pct_points": 0.0
+      },
+      "passed": false
+    },
+    {
+      "criterion": "Tariff-group distribution shift",
+      "target": "ToU group shows a materially larger shift than Std in 2013.",
+      "observed": {
+        "tou_mean_shift_pct": 35.55156453182974,
+        "tou_std_shift_pct": 31.887325470767603,
+        "tou_ks_statistic": 0.17871427363436496,
+        "std_mean_shift_pct": 8.739083894190879,
+        "std_std_shift_pct": 14.909153960175786,
+        "std_ks_statistic": 0.1671983341789278
+      },
+      "passed": true
+    },
+    {
+      "criterion": "Flat-rate stability",
+      "target": "Std group remains more stable than ToU across the drift window.",
+      "observed": {
+        "std_mean_shift_pct": 8.739083894190879,
+        "tou_mean_shift_pct": 35.55156453182974
+      },
+      "passed": true
+    },
+    {
+      "criterion": "Baseline degradation",
+      "target": "2013 RMSE increases by at least 15% relative to 2012 Q4.",
+      "observed": {
+        "test_2013_rmse_overall": 0.4003197116193927,
+        "rmse_increase_vs_2012_pct": 6.115897629479094,
+        "mae_increase_vs_2012_pct": 3.446833310225387
+      },
+      "passed": false
+    },
+    {
+      "criterion": "No leakage",
+      "target": "Temporal splits are strictly ordered and normalization is fit on the train split only.",
+      "observed": {
+        "train_window_end": "2012-10-01 00:00:00",
+        "test_2012_start": "2012-10-01 00:00:00",
+        "test_2013_start": "2013-01-01 00:00:00",
+        "average_window_missing_rate_before_fill_pct": 17.465239061176767
+      },
+      "passed": true
+    }
+  ],
+  "all_checks_passed": false
+}

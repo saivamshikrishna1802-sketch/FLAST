@@ -1,0 +1,54 @@
+{
+  "dataset_note": "2014 coverage is limited to Jan-Feb in the source dataset and is treated as a short post-drift window.",
+  "method_note": "ADF is retained only as a diagnostic artifact. It is not used as an acceptance criterion because unit-root testing is not a good match for mean-reverting household load.",
+  "threshold_note": "A node is classified as drift-affected if its RMSE degrades by at least 10% between 2012 Q4 and 2013. This reflects moderate behavioral non-stationarity consistent with the observed KS shift in ToU nodes.",
+  "acceptance_checks": [
+    {
+      "criterion": "Tariff-group distribution shift",
+      "target": "ToU distribution shift is statistically visible: KS statistic > 0.05 and p < 0.05.",
+      "observed": {
+        "tou_ks_statistic": 0.08163687959540311,
+        "tou_ks_p_value": 0.0,
+        "tou_mean_shift_pct": 30.75788819097195,
+        "tou_std_shift_pct": 41.98829993636501
+      },
+      "passed": true
+    },
+    {
+      "criterion": "Flat-rate stability",
+      "target": "Std group remains more stable than ToU in 2013.",
+      "observed": {
+        "std_mean_shift_pct": 13.822421997451617,
+        "tou_mean_shift_pct": 30.75788819097195,
+        "std_ks_statistic": 0.07381116466542648,
+        "tou_ks_statistic": 0.08163687959540311
+      },
+      "passed": true
+    },
+    {
+      "criterion": "Node-level baseline degradation",
+      "target": "At least 3 of 10 nodes exceed 10% RMSE degradation in 2013.",
+      "observed": {
+        "degraded_nodes": 0,
+        "total_nodes": 10,
+        "tou_degraded_nodes": 0,
+        "std_degraded_nodes": 0,
+        "tou_avg_rmse_increase_pct": -6.07406952826218,
+        "std_avg_rmse_increase_pct": -6.566032734840332
+      },
+      "passed": false
+    },
+    {
+      "criterion": "No leakage",
+      "target": "Temporal splits are strictly ordered and normalization is fit on each train split only.",
+      "observed": {
+        "train_window_end": "2012-10-01 00:00:00",
+        "test_2012_start": "2012-10-01 00:00:00",
+        "test_2013_start": "2013-01-01 00:00:00",
+        "average_window_missing_rate_before_fill_pct": 15.701105981012184
+      },
+      "passed": true
+    }
+  ],
+  "all_checks_passed": false
+}

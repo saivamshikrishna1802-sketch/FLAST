@@ -1,0 +1,10 @@
+window_key,window_label,stdorToU,failure_rate,failure_rate_pct
+drift_2013,2013 tariff-shift period,Overall,0.0,0.0
+drift_2013,2013 tariff-shift period,Std,0.0,0.0
+drift_2013,2013 tariff-shift period,ToU,0.0,0.0
+post_2014,2014 post-drift (Jan-Feb only),Overall,0.0,0.0
+post_2014,2014 post-drift (Jan-Feb only),Std,0.0,0.0
+post_2014,2014 post-drift (Jan-Feb only),ToU,0.0,0.0
+pre_2011_2012,2011-2012 pre-drift,Overall,0.0,0.0
+pre_2011_2012,2011-2012 pre-drift,Std,0.0,0.0
+pre_2011_2012,2011-2012 pre-drift,ToU,0.0,0.0

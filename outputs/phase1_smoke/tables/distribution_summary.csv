@@ -1,0 +1,7 @@
+window_key,window_label,stdorToU,mean_kwh,std_kwh,median_kwh,min_kwh,max_kwh,sample_count
+drift_2013,2013 tariff-shift period,Std,0.49584436,0.64775217,0.26,0.0,6.285,35040
+drift_2013,2013 tariff-shift period,ToU,0.24677157,0.31289157,0.12900001,0.0,4.3640003,35040
+post_2014,2014 post-drift (Jan-Feb only),Std,0.62821805,0.7340676,0.32999998,0.024,6.117,5664
+post_2014,2014 post-drift (Jan-Feb only),ToU,0.26310945,0.32679367,0.127,0.012,2.575,5664
+pre_2011_2012,2011-2012 pre-drift,Std,0.4559946,0.56370723,0.299,0.015000001,5.881,38880
+pre_2011_2012,2011-2012 pre-drift,ToU,0.18204996,0.23724124,0.09,0.0,3.965,38880
