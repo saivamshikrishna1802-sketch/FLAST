@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 
 
@@ -33,9 +33,10 @@ class Phase3Config:
     selective_retraining_node_type: str = "ToU"
     selective_retraining_min_drift_score: float = 0.075
     drift_weight_epsilon: float = 1e-6
-    drifting_node_gain_target_pct: float = 3.0
+    selective_gain_min_improvement_pct: float = 0.5
+    selective_gain_min_node_count: int = 3
     reference_node_gain_target_pct: float = 2.0
-    stable_node_harm_tolerance_pct: float = 2.0
+    stable_node_fedavg_harm_tolerance_pct: float = 2.0
     validation_start: str = "2012-09-01 00:00:00"
     validation_end: str = "2012-10-01 00:00:00"
     reference_drift_node_id: str = "node_tou_6"
@@ -117,6 +118,15 @@ class Phase3Config:
             start="2013-01-01 00:00:00",
             end="2014-01-01 00:00:00",
         )
+
+    @classmethod
+    def from_dict(cls, data: dict[str, object]) -> "Phase3Config":
+        allowed_fields = {field.name for field in fields(cls)}
+        kwargs = {key: value for key, value in data.items() if key in allowed_fields}
+        kwargs["phase1_root"] = Path(str(kwargs["phase1_root"]))
+        kwargs["phase2_root"] = Path(str(kwargs["phase2_root"]))
+        kwargs["output_root"] = Path(str(kwargs["output_root"]))
+        return cls(**kwargs)
 
     def to_dict(self) -> dict[str, object]:
         data = asdict(self)

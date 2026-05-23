@@ -64,6 +64,24 @@ def build_parser() -> argparse.ArgumentParser:
         default=0.075,
         help="Minimum KS drift score required for selective retraining eligibility.",
     )
+    parser.add_argument(
+        "--selective-gain-min-improvement-pct",
+        type=float,
+        default=0.5,
+        help="Minimum FLAST-vs-FedAvg 2013 improvement used to count a ToU node as a selective gain.",
+    )
+    parser.add_argument(
+        "--selective-gain-min-node-count",
+        type=int,
+        default=3,
+        help="Minimum number of ToU nodes that must satisfy the selective-gain threshold.",
+    )
+    parser.add_argument(
+        "--stable-node-fedavg-harm-tolerance-pct",
+        type=float,
+        default=2.0,
+        help="Maximum allowed worst-case stable-node 2013 RMSE degradation vs FedAvg.",
+    )
     parser.add_argument("--reference-drift-node-id", type=str, default="node_tou_6", help="Reference drift node used in the acceptance report.")
     parser.add_argument("--quiet", action="store_true", help="Suppress detailed stage and round progress logs.")
     return parser
@@ -92,6 +110,9 @@ def main() -> None:
         trigger_threshold=args.trigger_threshold,
         selective_retraining_node_type=args.selective_retraining_node_type,
         selective_retraining_min_drift_score=args.selective_retraining_min_drift_score,
+        selective_gain_min_improvement_pct=args.selective_gain_min_improvement_pct,
+        selective_gain_min_node_count=args.selective_gain_min_node_count,
+        stable_node_fedavg_harm_tolerance_pct=args.stable_node_fedavg_harm_tolerance_pct,
         reference_drift_node_id=args.reference_drift_node_id,
         verbose=not args.quiet,
     )

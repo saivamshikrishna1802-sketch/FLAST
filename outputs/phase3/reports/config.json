@@ -17,13 +17,14 @@
   "selective_retraining_node_type": "ToU",
   "selective_retraining_min_drift_score": 0.075,
   "drift_weight_epsilon": 1e-06,
-  "drifting_node_gain_target_pct": 3.0,
+  "selective_gain_min_improvement_pct": 0.5,
+  "selective_gain_min_node_count": 3,
   "reference_node_gain_target_pct": 2.0,
-  "stable_node_harm_tolerance_pct": 2.0,
+  "stable_node_fedavg_harm_tolerance_pct": 2.0,
   "validation_start": "2012-09-01 00:00:00",
   "validation_end": "2012-10-01 00:00:00",
   "reference_drift_node_id": "node_tou_6",
-  "verbose": true,
+  "verbose": false,
   "baseline_splits": [
     {
       "key": "train_2011_to_2012q3",

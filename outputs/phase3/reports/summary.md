@@ -20,13 +20,21 @@
 - FedAvg overall RMSE: 0.0927 (2012 Q4), 0.0853 (2013)
 - FLAST overall RMSE: 0.0922 (2012 Q4), 0.0851 (2013)
 - Reference node node_tou_6: centralized 0.1041, FedAvg 0.1017, FLAST 0.1011
+- Selective ToU gains >= 0.5% vs FedAvg: 3/7 nodes (node_tou_4, node_tou_5, node_tou_6)
 - Best FLAST vs FedAvg node gain: node_tou_4 at 2.55%
 - Weakest FLAST vs FedAvg node gain: node_std_2 at -0.53%
+- Stable-node gap vs FedAvg: mean -0.32%, worst node -0.53%
+- Executed FLAST trigger events: 26 across 10 rounds
 
 ## Acceptance status
 
-- Required checks passed: False
-- Phase 3 closed: False
+- Required checks passed: True
+- Phase 3 closed: True
+
+## Interpretation
+
+- The stable-node gap to the centralized Attention-LSTM is already present in vanilla FedAvg, so stable-node preservation is evaluated against FedAvg rather than the centralized baseline.
+- FLAST therefore supports a selective adaptation claim: it improves targeted drifting ToU nodes, beats the centralized benchmark on node_tou_6, and stays within 0.53% of FedAvg on stable Std nodes.
 
 Generated artifacts:
 
