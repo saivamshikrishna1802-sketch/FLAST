@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from dataclasses import dataclass
+from datetime import datetime
+from time import perf_counter
 
 import numpy as np
 import pandas as pd
@@ -25,6 +27,13 @@ class FederatedRunArtifacts:
     validation_history: pd.DataFrame
     aggregation_weights: pd.DataFrame
     trigger_events: pd.DataFrame
+
+
+def _log_progress(config: Phase3Config, message: str) -> None:
+    if not config.verbose:
+        return
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {message}", flush=True)
 
 
 def _set_seed(seed: int) -> None:
@@ -162,6 +171,13 @@ def _drift_aware_weights(node_clients: dict[str, NodeClientData], config: Phase3
     }
 
 
+def _eligible_for_selective_retraining(client: NodeClientData, config: Phase3Config) -> bool:
+    return (
+        client.node_type == config.selective_retraining_node_type
+        and float(client.drift_score) >= config.selective_retraining_min_drift_score
+    )
+
+
 def run_federated_training(
     method_name: str,
     node_clients: dict[str, NodeClientData],
@@ -179,7 +195,14 @@ def run_federated_training(
     final_personalized_states = {node_id: _clone_state_dict(global_state) for node_id in node_clients}
 
     sorted_node_ids = sorted(node_clients)
+    run_started = perf_counter()
+    _log_progress(
+        config,
+        f"{method_name}: starting federated training with {len(sorted_node_ids)} nodes for {config.rounds} rounds.",
+    )
     for round_idx in range(1, config.rounds + 1):
+        round_started = perf_counter()
+        _log_progress(config, f"{method_name}: round {round_idx}/{config.rounds} started.")
         client_states: dict[str, OrderedDict[str, torch.Tensor]] = {}
         client_train_losses: dict[str, float] = {}
         local_post_train_val_losses: dict[str, float] = {}
@@ -211,11 +234,15 @@ def run_federated_training(
         )
 
         personalized_states = {node_id: _clone_state_dict(global_state) for node_id in node_clients}
+        raw_triggered_node_count = 0
         triggered_node_count = 0
         if enable_selective_retraining:
             for client_index, decision in enumerate(trigger_decisions):
                 node_id = str(decision["node_id"])
-                if bool(decision["triggered"]):
+                raw_triggered = bool(decision["triggered"])
+                if raw_triggered:
+                    raw_triggered_node_count += 1
+                if raw_triggered and _eligible_for_selective_retraining(node_clients[node_id], config):
                     personalized_state, _ = _train_from_state(
                         initial_state=global_state,
                         client=node_clients[node_id],
@@ -225,6 +252,8 @@ def run_federated_training(
                     )
                     personalized_states[node_id] = personalized_state
                     triggered_node_count += 1
+        else:
+            raw_triggered_node_count = int(sum(bool(decision["triggered"]) for decision in trigger_decisions))
 
         current_personalized_val_losses = _evaluate_personalized_validation_losses(personalized_states, node_clients, config)
         final_personalized_states = personalized_states
@@ -240,6 +269,7 @@ def run_federated_training(
                 "mean_client_train_loss": mean_train_loss,
                 "mean_global_val_loss": mean_global_val_loss,
                 "mean_personalized_val_loss": mean_personalized_val_loss,
+                "raw_triggered_node_count": raw_triggered_node_count,
                 "triggered_node_count": triggered_node_count,
             }
         )
@@ -260,6 +290,8 @@ def run_federated_training(
 
         for decision in trigger_decisions:
             node_id = str(decision["node_id"])
+            eligible_for_selective_retraining = _eligible_for_selective_retraining(node_clients[node_id], config)
+            raw_triggered = bool(decision["triggered"])
             validation_rows.append(
                 {
                     "method": method_name,
@@ -271,7 +303,9 @@ def run_federated_training(
                     "global_val_loss": float(decision["current_val_loss"]),
                     "personalized_val_loss": float(current_personalized_val_losses[node_id]),
                     "relative_change_pct": float(decision["relative_change_pct"]),
-                    "triggered": bool(decision["triggered"]) if enable_selective_retraining else False,
+                    "eligible_for_selective_retraining": eligible_for_selective_retraining,
+                    "raw_triggered": raw_triggered,
+                    "triggered": raw_triggered and eligible_for_selective_retraining if enable_selective_retraining else False,
                 }
             )
             trigger_rows.append(
@@ -281,9 +315,23 @@ def run_federated_training(
                     "node_id": node_id,
                     "node_type": node_clients[node_id].node_type,
                     "relative_change_pct": float(decision["relative_change_pct"]),
-                    "triggered": bool(decision["triggered"]) if enable_selective_retraining else False,
+                    "eligible_for_selective_retraining": eligible_for_selective_retraining,
+                    "raw_triggered": raw_triggered,
+                    "triggered": raw_triggered and eligible_for_selective_retraining if enable_selective_retraining else False,
                 }
             )
+
+        _log_progress(
+            config,
+            (
+                f"{method_name}: round {round_idx}/{config.rounds} finished in {perf_counter() - round_started:.1f}s "
+                f"| train={mean_train_loss:.4f} | global_val={mean_global_val_loss:.4f} "
+                f"| personalized_val={mean_personalized_val_loss:.4f} "
+                f"| raw_triggers={raw_triggered_node_count} | executed_triggers={triggered_node_count}"
+            ),
+        )
+
+    _log_progress(config, f"{method_name}: completed in {perf_counter() - run_started:.1f}s.")
 
     return FederatedRunArtifacts(
         method_name=method_name,

@@ -50,7 +50,7 @@
       "criterion": "Selective retraining trigger fires correctly",
       "target": "At least one node is flagged for extra fine-tuning during FLAST.",
       "observed": {
-        "triggered_events": 39,
+        "triggered_events": 26,
         "triggered_rounds": 10
       },
       "passed": true

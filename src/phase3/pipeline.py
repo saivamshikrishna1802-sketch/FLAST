@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from pathlib import Path
+from time import perf_counter
 
 import matplotlib
 matplotlib.use("Agg")
@@ -22,6 +24,13 @@ from .evaluate import (
     plot_trigger_activity,
 )
 from .federated import run_federated_training
+
+
+def _log_progress(config: Phase3Config, message: str) -> None:
+    if not config.verbose:
+        return
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {message}", flush=True)
 
 
 def _ensure_output_dirs(config: Phase3Config) -> None:
@@ -216,9 +225,13 @@ def _write_summary_markdown(
 
 
 def run_phase3(config: Phase3Config) -> dict[str, object]:
+    run_started = perf_counter()
     _ensure_output_dirs(config)
+    _log_progress(config, "Phase 3: loading frozen Phase 1 and Phase 2 artifacts.")
     data_bundle = load_phase3_data(config)
+    _log_progress(config, f"Phase 3: loaded {len(data_bundle.node_clients)} node clients.")
 
+    _log_progress(config, "Phase 3: starting FedAvg baseline training.")
     fedavg_artifacts = run_federated_training(
         method_name="FedAvg",
         node_clients=data_bundle.node_clients,
@@ -226,6 +239,7 @@ def run_phase3(config: Phase3Config) -> dict[str, object]:
         use_drift_aware_aggregation=False,
         enable_selective_retraining=False,
     )
+    _log_progress(config, "Phase 3: starting FLAST training with selective retraining gate.")
     flast_artifacts = run_federated_training(
         method_name="FLAST",
         node_clients=data_bundle.node_clients,
@@ -234,6 +248,7 @@ def run_phase3(config: Phase3Config) -> dict[str, object]:
         enable_selective_retraining=True,
     )
 
+    _log_progress(config, "Phase 3: evaluating trained models on frozen test windows.")
     fedavg_metrics_tidy, fedavg_summary = evaluate_federated_model(
         method_name="FedAvg",
         node_clients=data_bundle.node_clients,
@@ -269,6 +284,7 @@ def run_phase3(config: Phase3Config) -> dict[str, object]:
     combined_node_summaries = pd.concat([fedavg_summary, flast_summary], ignore_index=True)
     combined_group_summary = pd.concat([fedavg_group_summary, flast_group_summary], ignore_index=True)
 
+    _log_progress(config, "Phase 3: writing tables, figures, and reports.")
     _write_dataframe(data_bundle.node_drift_scores, config.tables_dir / "node_drift_scores.csv")
     _write_dataframe(combined_round_history, config.tables_dir / "federated_round_history.csv")
     _write_dataframe(combined_validation_history, config.tables_dir / "federated_validation_history.csv")
@@ -308,6 +324,7 @@ def run_phase3(config: Phase3Config) -> dict[str, object]:
         table_4=table_4,
         acceptance_report=acceptance_report,
     )
+    _log_progress(config, f"Phase 3: finished in {perf_counter() - run_started:.1f}s.")
 
     return {
         "fedavg_summary": fedavg_summary,

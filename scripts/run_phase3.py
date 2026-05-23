@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from time import perf_counter
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -10,6 +11,13 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from phase3 import Phase3Config, run_phase3
+
+
+def _configure_utf8_output() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8", errors="replace")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -44,11 +52,25 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--hidden-size", type=int, default=64, help="Hidden size for the Attention-LSTM.")
     parser.add_argument("--dropout", type=float, default=0.2, help="Dropout used in the Attention-LSTM.")
     parser.add_argument("--trigger-threshold", type=float, default=0.05, help="Relative validation-loss increase required to trigger selective retraining.")
+    parser.add_argument(
+        "--selective-retraining-node-type",
+        type=str,
+        default="ToU",
+        help="Only nodes of this type are eligible for selective retraining.",
+    )
+    parser.add_argument(
+        "--selective-retraining-min-drift-score",
+        type=float,
+        default=0.075,
+        help="Minimum KS drift score required for selective retraining eligibility.",
+    )
     parser.add_argument("--reference-drift-node-id", type=str, default="node_tou_6", help="Reference drift node used in the acceptance report.")
+    parser.add_argument("--quiet", action="store_true", help="Suppress detailed stage and round progress logs.")
     return parser
 
 
 def main() -> None:
+    _configure_utf8_output()
     parser = build_parser()
     args = parser.parse_args()
 
@@ -68,7 +90,19 @@ def main() -> None:
         hidden_size=args.hidden_size,
         dropout=args.dropout,
         trigger_threshold=args.trigger_threshold,
+        selective_retraining_node_type=args.selective_retraining_node_type,
+        selective_retraining_min_drift_score=args.selective_retraining_min_drift_score,
         reference_drift_node_id=args.reference_drift_node_id,
+        verbose=not args.quiet,
+    )
+    started_at = perf_counter()
+    print("Phase 3 run starting.", flush=True)
+    print(f"Output root: {config.output_root}", flush=True)
+    print(
+        "Selective retraining gate: "
+        f"node_type={config.selective_retraining_node_type}, "
+        f"min_drift_score={config.selective_retraining_min_drift_score:.3f}",
+        flush=True,
     )
     results = run_phase3(config)
     acceptance = results["acceptance_report"]
@@ -80,6 +114,7 @@ def main() -> None:
     except ValueError:
         display_root = config.output_root
     print(f"Outputs written to: {display_root}")
+    print(f"Elapsed seconds: {perf_counter() - started_at:.1f}", flush=True)
 
 
 if __name__ == "__main__":

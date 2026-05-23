@@ -30,6 +30,8 @@ class Phase3Config:
     hidden_size: int = 64
     dropout: float = 0.2
     trigger_threshold: float = 0.05
+    selective_retraining_node_type: str = "ToU"
+    selective_retraining_min_drift_score: float = 0.075
     drift_weight_epsilon: float = 1e-6
     drifting_node_gain_target_pct: float = 3.0
     reference_node_gain_target_pct: float = 2.0
@@ -37,6 +39,7 @@ class Phase3Config:
     validation_start: str = "2012-09-01 00:00:00"
     validation_end: str = "2012-10-01 00:00:00"
     reference_drift_node_id: str = "node_tou_6"
+    verbose: bool = True
 
     @property
     def phase1_reports_dir(self) -> Path:
