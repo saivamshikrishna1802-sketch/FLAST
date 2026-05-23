@@ -1,0 +1,80 @@
+{
+  "phase1_frozen_root": "C:\\Users\\DELL\\OneDrive\\\u753b\u50cf\\Desktop\\researchpaper_code\\outputs\\phase1",
+  "phase2_frozen_root": "C:\\Users\\DELL\\OneDrive\\\u753b\u50cf\\Desktop\\researchpaper_code\\outputs\\phase2",
+  "notes": [
+    "Per-node KS drift scores are computed in Phase 3 from node mean series derived from the frozen Phase 1 node assignments.",
+    "The trigger validation slice is the last four weeks of the original training period (September 2012), preserving all frozen test splits.",
+    "The key reference comparison is node_tou_6, where FLAST must beat both centralized Attention-LSTM and vanilla FedAvg."
+  ],
+  "required_checks": [
+    {
+      "criterion": "Vanilla FedAvg converges",
+      "target": "Mean client train loss remains finite and ends below the first federated round.",
+      "observed": {
+        "first_round_mean_train_loss": 0.5142352412731197,
+        "final_round_mean_train_loss": 0.2923105658500644
+      },
+      "passed": true
+    },
+    {
+      "criterion": "FLAST beats Vanilla FedAvg on drifting nodes",
+      "target": "Average 2013 RMSE improvement across ToU nodes is at least 3%.",
+      "observed": {
+        "mean_tou_improvement_vs_fedavg_pct": 0.6161194952071927
+      },
+      "passed": false
+    },
+    {
+      "criterion": "FLAST beats centralized Attention-LSTM on the reference drift node",
+      "target": "node_tou_6 improves by at least 2% in 2013.",
+      "observed": {
+        "reference_node_id": "node_tou_6",
+        "centralized_rmse_2013": 0.1041169986128807,
+        "fedavg_rmse_2013": 0.10168729722499847,
+        "flast_rmse_2013": 0.1010846495628357,
+        "flast_vs_centralized_pct": 2.9124437800206335
+      },
+      "passed": true
+    },
+    {
+      "criterion": "Drift-aware weighting effect visible",
+      "target": "High-drift nodes receive less average aggregation weight than stable Std nodes.",
+      "observed": {
+        "fedavg_reference_weight": 0.1,
+        "top_drift_node_mean_weight": 0.061543180247426665,
+        "std_node_mean_weight": 0.13691403417248635
+      },
+      "passed": true
+    },
+    {
+      "criterion": "Selective retraining trigger fires correctly",
+      "target": "At least one node is flagged for extra fine-tuning during FLAST.",
+      "observed": {
+        "triggered_events": 39,
+        "triggered_rounds": 10
+      },
+      "passed": true
+    },
+    {
+      "criterion": "No leakage",
+      "target": "Validation stays inside the original train window and final evaluation uses the frozen Phase 1 splits.",
+      "observed": {
+        "local_validation_start": "2012-09-01 00:00:00",
+        "local_validation_end": "2012-10-01 00:00:00",
+        "frozen_test_2012q4_start": "2012-10-01 00:00:00",
+        "frozen_test_2013_start": "2013-01-01 00:00:00"
+      },
+      "passed": true
+    },
+    {
+      "criterion": "FLAST does not materially hurt stable nodes",
+      "target": "Mean 2013 RMSE change vs centralized on Std nodes stays within 2%.",
+      "observed": {
+        "std_mean_flast_vs_centralized_pct": -6.048591388734117
+      },
+      "passed": false
+    }
+  ],
+  "required_checks_passed": false,
+  "phase3_closed": false
+}
